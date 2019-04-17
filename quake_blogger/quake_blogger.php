@@ -15,23 +15,17 @@ include_once('quake_api.php');
  * Author:            Leslie Albrecht
  * Author URI:        https://github.com/rooirampokker/
  */
-
 //call quake_cron_activate when plugin activates
 register_activation_hook(__FILE__, 'quake_cron_activate');
 //standard deactivation - call function to remove cron and do cleanup
 register_deactivation_hook (__FILE__, 'quake_cron_deactivate');
 //for testing - create minutely cron
-add_filter( 'cron_schedules', 'cron_add_minute' );
+add_filter( 'cron_schedules', 'cron_add_minutely');
 
 
-/*
-* Schedule a new cron event if it doesn't already exist
-*/
-function quake_cron_activate() {
-    if( !wp_next_scheduled( 'quake_blogger_cron' ) ) {
-        wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' );
-    }
-}
+//frequency vars should be stored as configurable options from plugin admin page...
+$api_frequency = ['interval' => 1, 'unit' => 'hour', 'tense' => '-'];
+$quake_blogger = new Quake_api($api_frequency);
 /*
 * Unschedule cron event on plugin deactivation
 */
@@ -41,9 +35,17 @@ function quake_cron_deactivate() {
     wp_unschedule_event ($timestamp, 'quake_blogger_cron');
 }
 /*
-* add custom interval - just is just to test
+* Activate cron ent if it doesn't already exist
 */
-function cron_add_minute( $schedules ) {
+function quake_cron_activate() {
+    if( !wp_next_scheduled( 'quake_blogger_cron' ) ) {
+        wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' );
+    }
+}
+/*
+ *
+ */
+function cron_add_minutely($schedules) {
     // Adds once every minute to the existing schedules.
     $schedules['everyminute'] = array(
         'interval' => 60,
@@ -57,6 +59,3 @@ function cron_add_minute( $schedules ) {
 function quake_blogger() {
     print_r('here...');
 }
-
-//create a new object - no direct operations will be performed with this (yet) - purely just to trigger the add_action hook in the constructor to start the fetch -> write process
-$quake_blogger = new Quake_api();
