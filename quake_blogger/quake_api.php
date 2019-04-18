@@ -1,11 +1,8 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 class Quake_api {
     public $plugin_options = [];
-    public $offset_date; //how far back from current time should we fetch data?
-    public $current_date;    //just saves current time for easy reference elsewhere
+    public $offset_date;  //how far back from current time should we fetch data?
+    public $current_date; //just saves current time for easy reference elsewhere
 
     public function __construct() {
         $this->plugin_options = get_option('quake_plugin_options');
@@ -21,17 +18,14 @@ class Quake_api {
         //https://earthquake.usgs.gov/fdsnws/event/1/query?format=csv&updatedafter=2019-03-25T00:00:00
         $data              = array( 'format' => 'geojson', 'updatedafter' => $this->offset_date );
         $response          = wp_remote_get($this->plugin_options['api_url'], array( 'body' => $data ));
-        $formatted_results = $this->format_api_results_for_post($response);
-        //write_to_post($formattedResults);
-        file_put_contents('/var/www/quake_blogger/api_data.json', print_r($response['body'], true));
 
+        $this->format_api_results_and_post($response);
     }
 /*
  *
  */
-    public function format_api_results_for_post($response) {
+    public function format_api_results_and_post($response) {
         $decoded_response = json_decode($response['body']);
-
 	    $event_details = "<ul>\n";
         $event_array = [];
         foreach($decoded_response->features as $key => $event) {
@@ -47,6 +41,7 @@ class Quake_api {
                               'post_author'  => 1,
                               'post_status'  => 'publish'];
 	    wp_insert_post($post_data_arr);
+
         return $post_data_arr;
     }
 /*
