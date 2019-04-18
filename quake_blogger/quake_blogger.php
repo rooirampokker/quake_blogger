@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'WPINC' ) ) {die;}
 include_once('quake_api.php');
+include_once('admin_options.php');
 
 /**
  * @link              https://github.com/rooirampokker/
@@ -22,10 +23,7 @@ register_deactivation_hook (__FILE__, 'quake_cron_deactivate');
 //for testing - create minutely cron
 add_filter( 'cron_schedules', 'cron_add_minutely');
 
-
-//frequency vars should be stored as configurable options from plugin admin page...
-$api_frequency = ['interval' => 1, 'unit' => 'hour', 'tense' => '-'];
-$quake_blogger = new Quake_api($api_frequency);
+$quake_blogger = new Quake_api();
 /*
 * Unschedule cron event on plugin deactivation
 */
@@ -35,7 +33,7 @@ function quake_cron_deactivate() {
     wp_unschedule_event ($timestamp, 'quake_blogger_cron');
 }
 /*
-* Activate cron ent if it doesn't already exist
+* Activate cron if it doesn't already exist
 */
 function quake_cron_activate() {
     if( !wp_next_scheduled( 'quake_blogger_cron' ) ) {
@@ -43,7 +41,7 @@ function quake_cron_activate() {
     }
 }
 /*
- *
+ * not really necessary for prod, but handy for testing
  */
 function cron_add_minutely($schedules) {
     // Adds once every minute to the existing schedules.
@@ -57,5 +55,5 @@ function cron_add_minutely($schedules) {
 *
 */
 function quake_blogger() {
-    print_r('here...');
+    print_r('here we are...');
 }
