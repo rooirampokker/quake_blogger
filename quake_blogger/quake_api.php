@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 class Quake_api {
     public $plugin_options = [];
     public $offset_date; //how far back from current time should we fetch data?
@@ -28,22 +31,40 @@ class Quake_api {
  */
     public function format_api_results_for_post($response) {
         $decoded_response = json_decode($response['body']);
-        $post_data_arr     = ['post_title' => $this->generate_post_title($decoded_response)];
-        foreach($decoded_response['features'] as $event => $key) {
-            //cycle over all events, concatenate to variable and write as body afterwards
+
+	    $event_details = "<ul>\n";
+        $event_array = [];
+        foreach($decoded_response->features as $key => $event) {
+	        $event_details .= "<li>".$event->properties->title."</li>\n";
+            array_push($event_array, $event_details);
         }
-        file_put_contents('/var/www/quake_blogger/post_data_array.php', print_r($post_data_arr, true));
+	    $event_excerpt = "<ul>".implode("\n", array_slice($event_array, 0, 3))."</ul>";
+	    $event_details .= "</ul>\n";
+
+        $post_data_arr     = ['post_title'   => $this->generate_post_title($decoded_response),
+                              'post_content' => $event_details,
+                              'post_excerpt' => $event_excerpt,
+                              'post_author'  => 1,
+                              'post_status'  => 'publish'];
+	    wp_insert_post($post_data_arr);
         return $post_data_arr;
     }
 /*
- * decorator
+ * decorators
  */
     public function generate_post_title($decoded_response) {
-        $postTitle = $decoded_response->metadata->title." data between $this->offset_date and $this->current_date (".$decoded_response->metadata->count." events logged)";
+        $offset_date = $this->format_date_time($this->offset_date);
+        $current_date = $this->format_date_time($this->current_date);
+        //POST TITLE HERE: 2019-04-18 (10:20:25) - 2019-04-18 (22:20:25) (411 events logged)
+        $postTitle = $decoded_response->metadata->title.": $offset_date - $current_date (".$decoded_response->metadata->count." events logged)";
         return $postTitle;
     }
-    public function write_to_post($response) {
 
+    public function format_date_time($date) {
+        $dateTime = explode('T', $date);
+        $time     = explode('+', $dateTime[1]);
+
+        return $dateTime[0]." (".$time[0].")";
     }
 /*
  *
