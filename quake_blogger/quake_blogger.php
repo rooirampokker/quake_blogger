@@ -44,8 +44,8 @@ function quake_cron_activate() {
 		    'api_period'    => 'Hours'
 	    );
 	    update_option( 'quake_plugin_options', $defaults );
-	    //wp_schedule_event( time(), 'hourly', 'quake_blogger_cron' );
-        wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' ); //for testing purposes - see 'cron_add_minutely' below
+	    wp_schedule_event( time(), 'hourly', 'quake_blogger_cron' );
+        //wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' ); //for testing purposes - see 'cron_add_minutely' below
     }
 }
 /*
