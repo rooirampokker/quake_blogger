@@ -31,14 +31,21 @@ function quake_cron_deactivate() {
     // find out when the last event was scheduled and unschedule it
     $timestamp = wp_next_scheduled ('quake_blogger_cron');
     wp_unschedule_event ($timestamp, 'quake_blogger_cron');
+	delete_option('quake_plugin_options');
 }
 /*
 * Activate cron if it doesn't already exist
 */
 function quake_cron_activate() {
     if( !wp_next_scheduled( 'quake_blogger_cron' ) ) {
-	    wp_schedule_event( time(), 'hourly', 'quake_blogger_cron' );
-        //wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' ); //for testing purposes - see 'cron_add_minutely' below
+	    $defaults = array(
+		    'api_url'       => 'https://earthquake.usgs.gov/fdsnws/event/1/query?',
+		    'api_frequency' => 1,
+		    'api_period'    => 'Hours'
+	    );
+	    update_option( 'quake_plugin_options', $defaults );
+	    //wp_schedule_event( time(), 'hourly', 'quake_blogger_cron' );
+        wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' ); //for testing purposes - see 'cron_add_minutely' below
     }
 }
 /*
