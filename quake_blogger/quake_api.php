@@ -26,14 +26,15 @@ class Quake_api {
  */
     public function format_api_results_and_post($response) {
         $decoded_response = json_decode($response['body']);
-	    $event_details = "<ul>\n";
+	    $event_details = '';
         $event_array = [];
         foreach($decoded_response->features as $key => $event) {
-	        $event_details .= "<li>".$event->properties->title."</li>\n";
+	        $event_details .= '<li>'.$event->properties->title.'</li>';
             array_push($event_array, $event_details);
         }
-	    $event_excerpt = "<ul>".implode("\n", array_slice($event_array, 0, 3))."</ul>";
-	    $event_details .= "</ul>\n";
+        //we only want the first 3 items as excerpt
+	    $event_excerpt = '<ul>'.implode(' ', array_slice($event_array, 0, 3)).'</ul>';
+	    $event_details .= "<ul>$event_details</ul>\n";
 
         $post_data_arr     = ['post_title'   => $this->generate_post_title($decoded_response),
                               'post_content' => $event_details,
