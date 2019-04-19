@@ -16,13 +16,14 @@ include_once('admin_options.php');
  * Author:            Leslie Albrecht
  * Author URI:        https://github.com/rooirampokker/
  */
-//call quake_cron_activate when plugin activates
+//starts cron and creates default plugin options
 register_activation_hook(__FILE__, 'quake_cron_activate');
 //standard deactivation - call function to remove cron and do cleanup
 register_deactivation_hook (__FILE__, 'quake_cron_deactivate');
 //for testing - create minutely cron
 add_filter( 'cron_schedules', 'cron_add_minutely');
 
+//Quake_api constructor bootstraps 'query_quake_api' into the 'quake_blogger_cron' schedule, so no need to call any methods directly on object
 $quake_blogger = new Quake_api();
 /*
 * Unschedule cron event on plugin deactivation
