@@ -37,7 +37,8 @@ function quake_cron_deactivate() {
 */
 function quake_cron_activate() {
     if( !wp_next_scheduled( 'quake_blogger_cron' ) ) {
-        wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' );
+	    wp_schedule_event( time(), 'hourly', 'quake_blogger_cron' );
+        //wp_schedule_event( time(), 'everyminute', 'quake_blogger_cron' ); //for testing purposes - see 'cron_add_minutely' below
     }
 }
 /*
@@ -50,10 +51,4 @@ function cron_add_minutely($schedules) {
         'display' => __( 'Once Every Minute' )
     );
     return $schedules;
-}
-/*
-*
-*/
-function quake_blogger() {
-    print_r('here we are...');
 }
